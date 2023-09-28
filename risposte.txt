@@ -185,7 +185,7 @@ JOIN tournaments t ON t.id = tv.tournament_id
 WHERE a.name LIKE "Gioco dell'anno"
 AND YEAR(v.release_date) = 2018;
 
-Selezionare i giocatori che hanno giocato al gioco piÃ¹ atteso del 2018 in un torneo del 2019 (3306)
+Selezionare i giocatori che hanno giocato al gioco più atteso del 2018 in un torneo del 2019 (3306)
 
 SELECT  p.*
 FROM award_videogame av 
@@ -198,3 +198,41 @@ JOIN players p ON pt.player_id = p.id
 WHERE t.`year` = 2019
 AND a.name LIKE "Gioco più atteso"
 AND av.`year` = 2018;
+
+Selezionare i dati della prima software house che ha rilasciato un gioco, assieme ai dati del gioco stesso (software house id : 5)
+
+SELECT sh.id, sh.name 'software_house_name', v.release_date 'release_date', v.name 'videogame_name'
+FROM software_houses sh
+JOIN videogames v ON sh.id = v.software_house_id
+ORDER BY v.release_date ASC
+
+Selezionare i dati del videogame (id, name, release_date, totale recensioni) con più recensioni (videogame id : potrebbe uscire 449 o 398, sono entrambi a 20)
+
+SELECT v.id, v.name, v.release_date, COUNT(r.rating) 'total_reviews'
+FROM videogames v
+JOIN reviews r ON v.id = r.videogame_id
+GROUP BY v.id, v.name, v.release_date
+ORDER BY total_reviews DESC
+LIMIT 1
+
+Selezionare la software house che ha vinto più premi tra il 2015 e il 2016 (software house id : potrebbe uscire 3 o 1, sono entrambi a 3)
+
+SELECT sh.id 'software_house_id', sh.name 'software_house_name', COUNT(a.id) 'total_awards'
+FROM software_houses sh
+JOIN videogames v ON sh.id = v.software_house_id
+JOIN award_videogame av ON av.videogame_id = v.id
+JOIN awards a ON av.award_id = a.id
+WHERE av.year >= 2015 AND av.year <= 2016
+GROUP BY sh.id, sh.name
+ORDER BY total_awards DESC
+LIMIT 1;
+
+Selezionare le categorie dei videogame i quali hanno una media recensioni inferiore a 2 (10)
+
+SELECT c.id, c.name, avg(r.rating) 'avg_rating' 
+FROM categories c
+JOIN category_videogame cv ON c.id = cv.category_id
+JOIN videogames v ON cv.videogame_id = v.id
+JOIN reviews r ON v.id = r.videogame_id
+GROUP BY c.id,  c.name, r.rating 
+HAVING avg(r.rating)  < 2;
